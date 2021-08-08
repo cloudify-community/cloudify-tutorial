@@ -1,0 +1,146 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+description: >
+  This blueprint creates an AWS infrastructure environment.
+imports:
+  - https://cloudify.co/spec/cloudify/5.1.0/types.yaml
+  - plugin:cloudify-aws-plugin
+  - plugin:cloudify-utilities-plugin?version= >=1.22.1
+
+inputs:
+
+  aws_region_name:
+      type: string
+      default: 'us-east-1'
+
+dsl_definitions:
+
+  client_config: &client_config
+    aws_access_key_id: { get_secret: aws_access_key_id }
+    aws_secret_access_key: { get_secret: aws_secret_access_key }
+    region_name: { get_input: aws_region_name }
+
+node_templates:
+
+  vpc:
+    type: cloudify.nodes.aws.ec2.Vpc
+    properties:
+      client_config: *client_config
+      resource_config:
+        CidrBlock: 10.0.0.0/16
+        kwargs:
+      Tags:
+        - Key: Name
+          Value: main_vpc
+
+
+  public_subnet_1:
+    type: cloudify.nodes.aws.ec2.Subnet
+    properties:
+      client_config: *client_config
+      resource_config:
+        CidrBlock: 10.0.1.0/24
+        AvailabilityZone: { concat: [ { get_input: aws_region_name }, 'a' ] }
+        kwargs:
+          # MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: public_subnet_1
+    relationships:
+    - type: cloudify.relationships.depends_on
+      target: vpc
+
+  public_subnet_2:
+    type: cloudify.nodes.aws.ec2.Subnet
+    properties:
+      client_config: *client_config
+      resource_config:
+        CidrBlock: 10.0.2.0/24
+        AvailabilityZone: { concat: [ { get_input: aws_region_name }, 'b' ] }
+        kwargs:
+          # MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: public_subnet_2
+    relationships:
+    - type: cloudify.relationships.depends_on
+      target: vpc
+
+  private_subnet_1:
+    type: cloudify.nodes.aws.ec2.Subnet
+    properties:
+      client_config: *client_config
+      resource_config:
+        CidrBlock: 10.0.3.0/24
+        AvailabilityZone: { concat: [ { get_input: aws_region_name }, 'a' ] }
+        kwargs:
+          # MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: private_subnet_1
+    relationships:
+    - type: cloudify.relationships.depends_on
+      target: vpc
+
+  private_subnet_2:
+    type: cloudify.nodes.aws.ec2.Subnet
+    properties:
+      client_config: *client_config
+      resource_config:
+        CidrBlock: 10.0.4.0/24
+        AvailabilityZone: { concat: [ { get_input: aws_region_name }, 'b' ] }
+        kwargs:
+          # MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: private_subnet_2
+    relationships:
+    - type: cloudify.relationships.depends_on
+      target: vpc
+
+
+  internet_gateway:
+    type: cloudify.nodes.aws.ec2.InternetGateway
+    properties:
+      client_config: *client_config
+      resource_config:
+        kwargs:
+      Tags:
+        - Key: Name
+          Value: main_internet_gw
+    relationships:
+    - type: cloudify.relationships.connected_to
+      target: vpc
+
+  route_table:
+    type: cloudify.nodes.aws.ec2.RouteTable
+    properties:
+      client_config: *client_config
+      resource_config:
+        kwargs:
+      Tags:
+        - Key: Name
+          Value: route_table
+    relationships:
+    - type: cloudify.relationships.contained_in
+      target: vpc
+    - type: cloudify.relationships.connected_to
+      target: public_subnet_1
+    - type: cloudify.relationships.connected_to
+      target: public_subnet_2
+
+  route:
+    type: cloudify.nodes.aws.ec2.Route
+    properties:
+      client_config: *client_config
+      resource_config:
+        kwargs:
+          DestinationCidrBlock: '0.0.0.0/0'
+      Tags:
+        - Key: Name
+          Value: route
+    relationships:
+    - type: cloudify.relationships.contained_in
+      target: route_table
+    - type: cloudify.relationships.connected_to
+      target: internet_gateway

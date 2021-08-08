@@ -1,0 +1,1 @@
+The document should provide an example on advannced types on an input

@@ -1,0 +1,49 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+description: >
+  This blueprint creates an AWS infrastructure environment.
+
+imports:
+  - https://cloudify.co/spec/cloudify/5.1.0/types.yaml
+  - plugin:cloudify-aws-plugin
+  - plugin:cloudify-utilities-plugin?version= >=1.22.1
+
+inputs:
+  region_name:
+      type: string
+      default: 'us-east-1'
+
+  instance_type:
+    type: string
+    default: t2.micro
+
+node_templates:
+  vm_keypair:
+    type: cloudify.nodes.aws.ec2.Keypair
+    properties:
+      client_config:
+        aws_access_key_id: { get_secret: aws_access_key_id }
+        aws_secret_access_key: { get_secret: aws_secret_access_key }
+        region_name: { get_input: region_name }
+      resource_config:
+        KeyName: cloudify_public_key
+        PublicKeyMaterial: { get_secret: aws_public_key }
+
+  vm:
+    type: cloudify.nodes.aws.ec2.Instances
+    properties:
+      client_config:
+        aws_access_key_id: { get_secret: aws_access_key_id }
+        aws_secret_access_key: { get_secret: aws_secret_access_key }
+        region_name: { get_input: region_name }
+      agent_config:
+        install_method: none
+      resource_config:
+        InstanceType: { get_input: instance_type }
+        ImageId: ami-0c2b8ca1dad447f8a
+        kwargs:
+          KeyName: cloudify_public_key
+      use_public_ip: true
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: vm_keypair
