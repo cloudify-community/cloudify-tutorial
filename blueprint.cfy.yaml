@@ -6,15 +6,14 @@ description: >
 imports:
   - https://cloudify.co/spec/cloudify/6.1.0/types.yaml
   - plugin:cloudify-aws-plugin
+  - plugin:cloudify-utilities-plugin?version= >=1.22.1
 
 inputs:
   aws_access_key_id:
     type: string
-    required: true
 
   aws_secret_access_key:
     type: string
-    required: true
 
   region_name:
       type: string

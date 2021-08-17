@@ -1,0 +1,2 @@
+vpc_deployment_id: vpc
+subnet: private_subnet_1

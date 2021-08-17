@@ -9,9 +9,24 @@ imports:
   - plugin:cloudify-utilities-plugin?version= >=1.22.1
 
 inputs:
+
+  deployment_id:
+    type: string
+    required: true
+
+  subnet:
+    type: string
+    required: true
+    constraints:
+      - valid_values:
+        - public_subnet_1
+        - private_subnet_1
+        - public_subnet_2
+        - private_subnet_2
+
   region_name:
-      type: string
-      default: 'us-east-1'
+    type: string
+    default: us-east-1
 
   instance_type:
     type: string
@@ -24,7 +39,7 @@ node_templates:
     properties:
       resource_config:
         deployment:
-          id: d6cf8c78-0608-4793-9f27-f67a176bd817
+          id: { get_input: deployment_id }
 
   vm:
     type: cloudify.nodes.aws.ec2.Instances
@@ -39,5 +54,7 @@ node_templates:
         InstanceType: { get_input: instance_type }
         ImageId: ami-0d729a60
         kwargs:
-          SubnetId: { get_capability: [d6cf8c78-0608-4793-9f27-f67a176bd817, private_subnet_id] }
-      use_public_ip: false
+          SubnetId: { get_capability: [ {get_input: deployment_id}, { get_input: subnet }] }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: network_topology

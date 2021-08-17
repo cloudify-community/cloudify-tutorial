@@ -9,9 +9,24 @@ imports:
   - plugin:cloudify-utilities-plugin?version= >=1.22.1
 
 inputs:
+
+  vpc_deployment_id:
+    type: string
+    required: true
+
+  subnet:
+    type: string
+    required: true
+    constraints:
+      - valid_values:
+        - public_subnet_1
+        - private_subnet_1
+        - public_subnet_2
+        - private_subnet_2
+
   region_name:
-      type: string
-      default: 'us-east-1'
+    type: string
+    default: us-east-1
 
   instance_type:
     type: string
@@ -24,7 +39,7 @@ node_templates:
     properties:
       resource_config:
         deployment:
-          id: d6cf8c78-0608-4793-9f27-f67a176bd817
+          id: { get_input: vpc_deployment_id }
 
   vm:
     type: cloudify.nodes.aws.ec2.Instances
@@ -39,39 +54,8 @@ node_templates:
         InstanceType: { get_input: instance_type }
         ImageId: ami-0d729a60
         kwargs:
-          SubnetId: { get_capability: [d6cf8c78-0608-4793-9f27-f67a176bd817, public_subnet_id] }
+          SubnetId: { get_capability: [ {get_input: vpc_deployment_id}, { get_input: subnet }] }
       use_public_ip: true
     relationships:
       - type: cloudify.relationships.depends_on
         target: network_topology
-      - type: cloudify.relationships.depends_on
-        target: nic
-      - type: cloudify.relationships.depends_on
-        target: ip
-
-  ip:
-    type: cloudify.nodes.aws.ec2.ElasticIP
-    properties:
-      client_config:
-        aws_access_key_id: { get_secret: aws_access_key_id }
-        aws_secret_access_key: { get_secret: aws_secret_access_key }
-        region_name: { get_input: region_name }
-    relationships:
-    - type: cloudify.relationships.depends_on
-      target: nic
-
-  nic:
-    type: cloudify.nodes.aws.ec2.Interface
-    properties:
-      client_config:
-        aws_access_key_id: { get_secret: aws_access_key_id }
-        aws_secret_access_key: { get_secret: aws_secret_access_key }
-        region_name: { get_input: region_name }
-      resource_config:
-        kwargs:
-          Description: Created by cloudify-getting-started-example.
-          SubnetId: { get_capability: [d6cf8c78-0608-4793-9f27-f67a176bd817, public_subnet_id] }
-    relationships:
-      - type: cloudify.relationships.depends_on
-        target: network_topology
-    

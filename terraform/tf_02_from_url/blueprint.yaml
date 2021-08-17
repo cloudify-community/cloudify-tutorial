@@ -11,6 +11,13 @@ inputs:
   aws_region_name:
     type: string
     default: 'us-east-1'
+    constraints:
+      - valid_values:
+        - ca-central-1
+        - us-east-1
+        - us-west-1
+        - us-west-2
+        - eu-west-1
 
 node_templates:
   terraform:
@@ -24,7 +31,8 @@ node_templates:
     properties:
       resource_config:
         source: 
-          location: terraform.zip
+          location: https://github.com/cloudify-cosmo/cloudify-tutorial.zip
+        source_path: terraform/tf_01_from_url/terraform.zom
         variables:
           access_key: { get_secret: aws_access_key_id }
           secret_key: { get_secret: aws_secret_access_key }

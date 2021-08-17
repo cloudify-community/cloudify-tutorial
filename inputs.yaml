@@ -1,0 +1,43 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+data_types:
+  co.person:
+    properties:
+      first_name:
+        type: string
+      last_name:
+        type: string
+      age:
+        type: integer
+
+inputs:
+  type_string:
+    type: string
+    default: asdvonv
+    required: true
+    
+  type_integer:
+    type: integer
+
+  type_float:
+    type: float
+
+  type_boolean:
+    type: boolean
+
+  type_list:
+    type: list
+
+  type_dict:
+    type: dict
+
+  type_object:
+    type: co.person
+
+  constraint_valid_values:
+    type: string
+    constraints:
+      - valid_values:
+        - value_1
+        - value_2
+
