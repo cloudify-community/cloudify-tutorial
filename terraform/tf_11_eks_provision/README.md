@@ -5,7 +5,9 @@ sudo docker run --name my_cfy_manager -d --restart unless-stopped -v /sys/fs/cgr
 
 ## Install and config CLI
 pip install cloudify==6.1.0
+
 cfy profiles use localhost -u admin -p admin
+
 cfy profiles set --manager-tenant default_tenant
 
 ## Upload All Plugins
@@ -13,6 +15,7 @@ cfy plugins bundle-upload
 
 ## Create secrets
 cfy secrets create aws_access_key_id --secret-string <value>
+
 cfy secrets create aws_secret_access_key --secret-string <value>
 
 ## Run blueprint to provision eks with Terraform and Cloudify Manager
