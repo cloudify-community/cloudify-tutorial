@@ -1,5 +1,5 @@
-module_source: https://github.com/cloudify-cosmo/cloudify-tutorial.zip
-terraform_template_location: terraform/tf_01_from_a_file/terraform.zip
+module_source: https://github.com/cloudify-community/cloudify-tutorial.git
+terraform_template_location: terraform/tf_11_eks_provision/terraform.zip
 variables:
   access_key: { get_secret: aws_access_key_id }
   secret_key: { get_secret: aws_secret_access_key }
