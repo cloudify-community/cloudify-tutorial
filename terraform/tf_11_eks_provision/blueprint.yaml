@@ -1,0 +1,84 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+description: >
+  This blueprint creates infrastructure on AWS using Terraform.
+imports:
+  - http://cloudify.co/spec/cloudify/5.0.5/types.yaml
+  - plugin:cloudify-terraform-plugin
+  - plugin:cloudify-utilities-plugin?version= >=1.22.1
+
+inputs:
+  terraform_version:
+    type: string
+    default: 0.13.0
+    constraints:
+      - valid_values:
+        - 1.0.4
+        - 1.0.3
+        - 1.0.2
+        - 1.0.1
+        - 1.0.0
+        - 0.15.5
+        - 0.15.4
+        - 0.15.3
+        - 0.15.2
+        - 0.15.1
+        - 0.15.0
+        - 0.14.11
+        - 0.14.10
+        - 0.14.9
+        - 0.14.8
+        - 0.14.7
+        - 0.14.6
+        - 0.14.5
+        - 0.14.4
+        - 0.14.3
+        - 0.14.2
+        - 0.14.1
+        - 0.14.0
+        - 0.13.7
+        - 0.13.6
+        - 0.13.5
+        - 0.13.4
+        - 0.13.3
+        - 0.13.2
+        - 0.13.1
+        - 0.13.0
+
+  module_source:
+    type: string
+    required: true
+
+  terraform_template_location:
+    type: string
+    default: ''
+
+  variables:
+    type: dict
+    default: {}
+
+  environment_variables:
+    type: dict
+    default: {}
+
+
+node_templates:
+  terraform:
+    type: cloudify.nodes.terraform
+    properties:
+      resource_config:
+        installation_source: { concat: ['https://releases.hashicorp.com/terraform/', { get_input: terraform_version }, '/terraform_', { get_input: terraform_version }, '_linux_amd64.zip']}
+
+  cloud_resources:
+    type: cloudify.nodes.terraform.Module
+    properties:
+      resource_config:
+        source: 
+          location: { get_input: module_source }
+        source_path: { get_input: terraform_template_location }
+        variables: { get_input: variables }
+        environment_variables: { get_input: environment_variables }
+    relationships:
+      - target: terraform
+        type: cloudify.terraform.relationships.run_on_host
+  
