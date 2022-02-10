@@ -63,13 +63,9 @@ node_templates:
     properties:
       resource_config:
         source: 
-          location: 'https://github.com/cloudify-community/cloudify-tutorial.git'
-        source_path: 'terraform/tf_11_eks_provision/template'
-        variables:
-          access_key: { get_secret: aws_access_key_id }
-          secret_key: { get_secret: aws_secret_access_key }
-          aws_region: eu-west-3
-          cluster_name: eks-training
+          location: { get_input: module_source }
+        source_path: { get_input: terraform_template_location }
+        variables: { get_input: variables }
         environment_variables: { get_input: environment_variables }
     relationships:
       - target: terraform
