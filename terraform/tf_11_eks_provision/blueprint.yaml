@@ -50,6 +50,18 @@ inputs:
     type: dict
     default: {}
 
+  module_source:
+    type: string
+    required: true
+
+  terraform_template_location:
+    type: string
+    default: ''
+
+  variables:
+    type: dict
+    default: {}
+
 
 node_templates:
   terraform:
