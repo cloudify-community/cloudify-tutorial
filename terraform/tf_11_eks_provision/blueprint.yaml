@@ -45,17 +45,6 @@ inputs:
         - 0.13.1
         - 0.13.0
 
-  module_source:
-    type: string
-    required: true
-
-  terraform_template_location:
-    type: string
-    default: ''
-
-  variables:
-    type: dict
-    default: {}
 
   environment_variables:
     type: dict
