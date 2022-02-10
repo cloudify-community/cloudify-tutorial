@@ -13,6 +13,11 @@ cfy profiles set --manager-tenant default_tenant
 ## Upload All Plugins
 cfy plugins bundle-upload
 
+## Installing GIT
+docker exec -it cloudify_container_id bash
+
+sudo yum install git -y
+
 ## Create secrets
 cfy secrets create aws_access_key_id --secret-string <value>
 
