@@ -10,7 +10,7 @@ imports:
 inputs:
   terraform_version:
     type: string
-    default: 0.13.0
+    default: 0.13.1
     constraints:
       - valid_values:
         - 1.0.4
